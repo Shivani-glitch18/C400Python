@@ -1,31 +1,42 @@
-import csv
 import requests
 
-CSV_URL = 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv'
+url = 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv'
 
-with requests.get(CSV_URL, stream=True) as file:
-    lines = (line.decode('utf-8') for line in file.iter_lines())
-    data = [row for row in csv.reader(lines)]
+response = requests.get(url)
 
-# print(data)
-total = len(data) - 1
-print(f'total no. of records: {total}')
+with open('taxi_zone_lookup.csv', 'wb') as f:
+    f.write(response.content)
 
-borough=[]
-brooks=0
+file = open('taxi_zone_lookup.csv', 'r')
+lines = file.readlines()
+file.close()
 
-for row in data[1:]:
-    if row[1] not in borough:
-        borough.append(row[1])
-    if row[1]=='Brooklyn':
-        brooks +=1
+lines = lines[1:]
+lines.sort()
 
-borough.sort()
-print(f'\n\nunique boroughs:\n {borough}')
+print(len(lines))
 
-print(f'\n\nBrooklyn boroughs: {brooks}')
+boroughs = set()
 
-with open('/root/taxi_zone_output.txt', mode='w') as op:
-    op.write(f'total no. of records: {total}')
-    op.write(f'\n\nunique boroughs:\n {borough}')
-    op.write(f'\n\nBrooklyn boroughs: {brooks}')
+for line in lines:
+    line = line.split(',')
+    boroughs.add(line[1])
+
+print(boroughs)
+
+brooklyn = 0
+
+for line in lines:
+    line = line.split(',')
+    if line[1] == '"Brooklyn"':
+        brooklyn += 1
+
+print(brooklyn)
+
+output = open('C:\\Users\\hp\\Desktop\\mthree\\C400Python\\taxi_zone_output.txt', 'w') #/root/taxi_zone_output.txt
+
+output.write(f'Total number of records: {len(lines)}\n')
+output.write(f'Unique boroughs: {boroughs}\n')
+output.write(f'Number of records for Brooklyn: {brooklyn}\n')
+
+output.close()
