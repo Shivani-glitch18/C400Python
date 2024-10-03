@@ -1,30 +1,31 @@
-import requests
 import csv
+import requests
 
-url = 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv'
-response = requests.get(url)
+CSV_URL = 'https://d37ci6vzurychx.cloudfront.net/misc/taxi_zone_lookup.csv'
 
-dataset= "C:/Users/hp/Desktop/mthree/C400Python/taxi_dataset.csv"
-with open(dataset, 'wb') as file:
-    file.write(response.content)
+with requests.get(CSV_URL, stream=True) as r:
+    lines = (line.decode('utf-8') for line in r.iter_lines())
+    data = [row for row in csv.reader(lines)]
 
-with open(dataset, newline='') as csvfile:
-    csvreader = csv.DictReader(csvfile)
-    taxi = list(csvreader)
+# print(data)
+total=len(data)
+print(f'total no. of records: {total}')
 
+borough=[]
+brooks=0
 
-total_records = len(taxi)
+for row in data[1:]:
+    if row[1] not in borough:
+        borough.append(row[1])
+    if row[1]=='Brooklyn':
+        brooks +=1
 
-print(total_records)
+borough.sort()
+print(f'\n\nunique boroughs:\n {borough}')
 
-boroughs = set(row['Borough'] for row in taxi)
-print(boroughs)
+print(f'\n\nBrooklyn boroughs: {brooks}')
 
-brooklyn_records = sum(1 for row in taxi if row['Borough'] == 'Brooklyn')
-print(brooklyn_records)
-
-output_file_path = 'C:/Users/hp/Desktop/mthree/C400Python/root/taxi_zone_output.txt'
-with open(output_file_path,'w') as output_file:
-    output_file.write(f"Total number of records: {total_records}\n")
-    output_file.write(f"Unique boroughs: {', '.join(boroughs)}\n")
-    output_file.write(f"Number of records for Brooklyn borough: {brooklyn_records}\n")
+with open('taxi_zone_output.txt', mode='w') as op:
+    op.write(f'total no. of records: {total}')
+    op.write(f'\n\nunique boroughs:\n {borough}')
+    op.write(f'\n\nBrooklyn boroughs: {brooks}')
