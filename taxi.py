@@ -13,7 +13,7 @@ with open(dataset, newline='') as csvfile:
     taxi = list(csvreader)
 
 
-total_records = len(taxi)-1
+total_records = len(taxi)
 
 print(total_records)
 
